@@ -40,7 +40,7 @@ logging.basicConfig(
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(
-        chat_id=update.effective_chat.id, text="I'm a bot, please talk to me!"
+        chat_id=update.effective_chat.id, text="Hi, I'm Sauce Bot. Use /s to summarize the chat or /s n where n is the number of messages to summarize."
     )
 
 
