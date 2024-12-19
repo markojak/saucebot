@@ -26,7 +26,7 @@ def convert_reply_message(message: Message):
     return {"from": convert_user(message.from_user), "text": message.text}
 
 
-def save_message(message: Message, image_description: str) -> str:
+def save_message(message: Message, image_description: str, urls: List[str] = None) -> str:
     if message == None:
         return
     
@@ -47,6 +47,11 @@ def save_message(message: Message, image_description: str) -> str:
         "text": message_text,
     }
 
+    if urls and len(urls) > 0:
+        s_message["urls"] = urls
+    else:
+        s_message["urls"] = None
+    
     if image_description != None and len(image_description) > 0:
         s_message["attachment_description"] = image_description
 
@@ -67,3 +72,19 @@ def get_last_messages(chat_id, limit) -> List:
 
 def get_message(chat_id, message_id) -> DocumentSnapshot:
     return db.collection(chat_id).document(message_id).get()
+
+def get_last_messages_with_urls(chat_id: str, limit: int) -> List:
+    """Get last messages that contain URLs"""
+    # Get all messages and filter in memory
+    snapshots = (
+        db.collection(chat_id)
+        .order_by("date", direction=firestore.Query.DESCENDING)
+        .limit(limit)
+        .get()
+    )
+    # Filter messages that have non-empty urls
+    return [
+        snap.to_dict() 
+        for snap in snapshots 
+        if "urls" in snap.to_dict() and snap.get("urls") and len(snap.get("urls")) > 0
+    ]
