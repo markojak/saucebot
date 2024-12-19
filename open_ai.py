@@ -94,9 +94,12 @@ def ai_transcript_audio(path: Path) -> str:
             result += doc.page_content
     return result
 
-def ai_summarize_page_content(page_content: str):
+def ai_summarize_page_content(page_content: str, language: str = "ENGLISH"):
+    template = PromptTemplate.from_template(prompts.summarize_web_content).format(
+        language=language
+    )
     messages = [
-        SystemMessage(content=prompts.summarize_web_content),
+        SystemMessage(content=template),
         HumanMessage(content=page_content),
     ]
     response = chain_t9.invoke(messages)

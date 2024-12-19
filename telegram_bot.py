@@ -108,14 +108,21 @@ async def default_summarize(
 
 
 async def summarize(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Check if the first argument is "url"
-    if len(context.args) > 0 and context.args[0].lower() == "url":
-        # Get limit from second argument if it exists
-        limit = int(context.args[1]) if len(context.args) > 1 else int(os.getenv("DEFAULT_HISTORY_LENGTH"))
-        await summarize_urls(update, context, limit)
-    else:
-        # Original summarize behavior
-        await default_summarize(update, context, ai_summarize)
+    processing_message = await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="🤖 Processing... Please wait..."
+    )
+    try:
+        # Check if the first argument is "url"
+        if len(context.args) > 0 and context.args[0].lower() == "url":
+            # Get limit from second argument if it exists
+            limit = int(context.args[1]) if len(context.args) > 1 else int(os.getenv("DEFAULT_HISTORY_LENGTH"))
+            await summarize_urls(update, context, limit)
+        else:
+            # Original summarize behavior
+            await default_summarize(update, context, ai_summarize)
+    finally:
+        await processing_message.delete()
 
 
 async def retell(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -134,7 +141,6 @@ async def bot_mention(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         params = ai_identify_parameters(update.message.text)
-
         if params["history_length"] is None:
             params["history_length"] = int(os.getenv("DEFAULT_HISTORY_LENGTH"))
         if params["language"] is None:
@@ -144,9 +150,7 @@ async def bot_mention(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         params["chat_id"] = str(update.message.chat.id)
 
-        messages = get_last_messages(
-            str(update.message.chat.id), params["history_length"]
-        )
+        messages = get_last_messages(str(update.message.chat.id), params["history_length"])
         result = ai_retell(messages, params)
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
@@ -292,7 +296,6 @@ async def process_video_note_message(update: Update, context: ContextTypes.DEFAU
 
 
 async def process_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Parses the CallbackQuery and updates the message text."""
     query = update.callback_query
     await query.edit_message_text(text="🤖 Processing... 🍆💦")
     type, chat_id, fb_message_id, reply_to_message_id = query.data.split(":")
@@ -300,27 +303,25 @@ async def process_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     if type == "u":
         message = get_message(chat_id, fb_message_id).to_dict()
         message_text = message["text"]
-        url_summaries = await process_urls(message_text)
-        if url_summaries == None or len(url_summaries) == 0:
-            return
-        for summary in url_summaries:
-            title = (
-                summary.metadata["title"] if "title" in summary.metadata else "Summary"
-            )
+        url_summaries = await process_urls(
+            message_text,
+            language=os.getenv("DEFAULT_LANGUAGE", "ENGLISH")
+        )
+        if url_summaries and url_summaries[0]:  # Only process first summary
+            summary = url_summaries[0]
+            title = summary.metadata.get("title", "Summary")
             text = f"*{escape(title)}*: {escape(summary.page_content)}"
     elif type == "m":
         message = get_message(chat_id, fb_message_id).to_dict()
         text = escape(message["text"])
-    # CallbackQueries need to be answered, even if no notification to the user is needed
-    # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
-    await query.answer()
 
+    await query.answer()
     await query.edit_message_text(text=text, parse_mode="MarkdownV2")
 
 
 async def summarize_urls(update: Update, context: ContextTypes.DEFAULT_TYPE, limit: int):
     try:
-        messages = get_last_messages_with_urls(str(update.message.chat.id), limit)
+        messages = get_last_messages_with_urls(str(update.message.chat.id), 1)  # Only get 1 message
         
         if not messages:
             await context.bot.send_message(
@@ -329,22 +330,52 @@ async def summarize_urls(update: Update, context: ContextTypes.DEFAULT_TYPE, lim
             )
             return
             
-        for message in messages:
-            url_summaries = await process_urls(message["text"])
-            if url_summaries:
-                for summary in url_summaries:
-                    title = summary.metadata.get("title", "Summary")
-                    text = f"*{escape(title)}*: {escape(summary.page_content)}"
-                    await context.bot.send_message(
-                        chat_id=update.effective_chat.id,
-                        text=text,
-                        parse_mode="MarkdownV2"
-                    )
+        last_message = messages[0]
+        url_summaries = await process_urls(
+            last_message["text"],
+            language=os.getenv("DEFAULT_LANGUAGE", "ENGLISH")
+        )
+        
+        if url_summaries and url_summaries[0]:
+            summary = url_summaries[0]
+            title = summary.metadata.get("title", "Summary")
+            text = f"*{escape(title)}*: {escape(summary.page_content)}"
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=text,
+                parse_mode="MarkdownV2"
+            )
     except Exception as error:
         await context.bot.send_message(
             chat_id=update.effective_chat.id, 
             text=repr(error)
         )
+
+
+async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    help_text = """
+*Saucebot 🍟 Available Commands*:
+• /s \- Summarize last 200 messages
+• /s n \- Summarize last number "n" messages
+• /s url \- Summarize the last shared URL
+• @givemethesaucebot \- Mention me to analyze chat with custom parameters:
+  \- language: \[ENGLISH, RUSSIAN, etc\.\]
+  \- tone: \[CASUAL, FORMAL\]
+  \- length: \[number of messages\]
+
+  DM @markojak for feedback and requests
+
+*Features*:
+• Automatically transcribes voice messages and videos
+• Summarizes web pages and articles
+• Describes images
+• Analyzes chat conversations
+"""
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=help_text,
+        parse_mode="MarkdownV2"
+    )
 
 
 def start_bot():
@@ -368,6 +399,7 @@ def start_bot():
         & (~filters.Mention(bot_name)),
         save_message,
     )
+    help_handler = CommandHandler("help", help)
 
     application.add_handler(start_handler)
     application.add_handler(s_handler)
@@ -379,5 +411,6 @@ def start_bot():
     application.add_handler(video_message_handler)
     application.add_handler(video_note_message_handler)
     application.add_handler(CallbackQueryHandler(process_callback))
+    application.add_handler(help_handler)
 
     application.run_polling()

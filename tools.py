@@ -2,10 +2,12 @@ import asyncio
 from typing import List, Optional
 from urllib.parse import urlparse
 from langchain_community.document_loaders import WebBaseLoader
-
+from langchain_core.documents import Document
+from langchain_community.document_loaders import AsyncChromiumLoader
 from open_ai import ai_summarize_page_content
 from langchain_community.document_loaders import YoutubeLoader
 from pytube.exceptions import PytubeError
+import re
 
 language_codes = [
     "en",
@@ -182,25 +184,26 @@ non_supported_urls = [
 ]
 
 
-async def process_urls(message: str) -> Optional[List]:
+async def process_urls(text: str, language: str = "ENGLISH") -> List[Document]:
     """
     Process URLs found in the input message.
 
-    Extracts the first valid URL from the message, creates an appropriate loader
+    Extracts the last valid URL from the message, creates an appropriate loader
     based on the URL type (YouTube or web), and loads the document with retry logic
     for YouTube videos. Summarizes the page content using AI.
 
     Args:
-        message (str): The input message containing URLs.
+        text (str): The input message containing URLs.
+        language (str): The language for the summary output.
 
     Returns:
         Optional[List]: A list containing the processed document or None if processing fails.
     """
-    urls = extract_urls_from_message(message)
+    urls = extract_urls_from_message(text)
     if not urls:
         return None
 
-    url = urls[0]
+    url = urls[-1]  # Get the last URL
 
     loader = create_loader_for_url(url)
     if not loader:
@@ -211,11 +214,11 @@ async def process_urls(message: str) -> Optional[List]:
         print("Failed to load the document after maximum retries.")
         return None
 
-    document.page_content = ai_summarize_page_content(document.page_content)
+    document.page_content = ai_summarize_page_content(document.page_content, language)
     return [document]
 
 
-def extract_urls_from_message(message: str) -> List[str]:
+def extract_urls_from_message(text: str) -> List[str]:
     """
     Extracts URLs from the input message.
 
@@ -225,21 +228,12 @@ def extract_urls_from_message(message: str) -> List[str]:
     Returns:
         List[str]: A list of extracted URLs.
     """
-    words = message.split()
-    urls = []
-    for word in words:
-        parsed_url = urlparse(word)
-        if parsed_url.scheme and parsed_url.netloc:
-            urls.append(word)
-
-    # Remove URLs that are in the non_supported_urls list
-    filtered_urls = [
-        url
-        for url in urls
-        if not any(non_supported_url in url for non_supported_url in non_supported_urls)
-    ]
-    return filtered_urls
-
+    if not text:
+        return None
+    
+    url_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+    urls = re.findall(url_pattern, text)
+    return urls if urls else None
 
 def create_loader_for_url(url: str):
     """
@@ -288,3 +282,4 @@ async def load_document_with_retries(loader, max_retries: int = 20):
             print(f"An unexpected error occurred: {e}")
             raise
     return None
+
