@@ -8,6 +8,9 @@ RUN apt-get update && \
 
 WORKDIR /app
 
+# Set USER_AGENT environment variable
+ENV USER_AGENT="TelegramBot/1.0"
+
 # Copy requirements first for better caching
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

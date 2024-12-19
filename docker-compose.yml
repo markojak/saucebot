@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    environment:
+      - ENVIRONMENT=development
     volumes:
       - ./.env.staging:/app/.env
       - ./serviceAccountKey.json:/app/serviceAccountKey.json
