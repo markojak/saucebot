@@ -173,7 +173,7 @@ async def process_voice_message(
             if os.getenv("ECHO_VOICE_MESSAGE_TYPE") == "BUTTON":
                 await context.bot.send_message(
                     chat_id=update.effective_chat.id,
-                    text="Actions:",
+                    text="🎤 Discovered a voice message\! Click below to see the transcription",
                     reply_to_message_id=update.message.message_id,
                     parse_mode="MarkdownV2",
                     reply_markup=InlineKeyboardMarkup(
@@ -186,14 +186,15 @@ async def process_voice_message(
                     )
                 )
             else:
-                reply_text = f"*{update.message.from_user.username}*: {escape(transcription)}"
+                reply_text = f"*{escape(update.message.from_user.username)}*: {escape(transcription)}"
                 await context.bot.send_message(
                     chat_id=update.effective_chat.id,
                     text=reply_text,
                     reply_to_message_id=update.message.message_id,
-                    parse_mode="MarkdownV2",
+                    parse_mode="MarkdownV2"
                 )
-    except:
+    except Exception as e:
+        logging.error(f"Error in process_voice_message: {str(e)}")
         pass
     finally:
         if path_to_file != None:
@@ -215,7 +216,7 @@ async def process_video_message(update: Update, context: ContextTypes.DEFAULT_TY
             if os.getenv("ECHO_VOICE_MESSAGE_TYPE") == "BUTTON":
                 await context.bot.send_message(
                     chat_id=update.effective_chat.id,
-                    text="Actions:",
+                    text="🎥 Discovered a video\! Click below to see the transcription",
                     reply_to_message_id=update.message.message_id,
                     parse_mode="MarkdownV2",
                     reply_markup=InlineKeyboardMarkup(
@@ -228,14 +229,15 @@ async def process_video_message(update: Update, context: ContextTypes.DEFAULT_TY
                     )
                 )
             else:
-                reply_text = f"*{update.message.from_user.username}*: {escape(transcription)}"
+                reply_text = f"*{escape(update.message.from_user.username)}*: {escape(transcription)}"
                 await context.bot.send_message(
                     chat_id=update.effective_chat.id,
                     text=reply_text,
                     reply_to_message_id=update.message.message_id,
                     parse_mode="MarkdownV2"
                 )
-    except:
+    except Exception as e:
+        logging.error(f"Error in process_video_message: {str(e)}")
         pass
     finally:
         if path_to_video_file != None:
@@ -259,7 +261,7 @@ async def process_video_note_message(update: Update, context: ContextTypes.DEFAU
             if os.getenv("ECHO_VOICE_MESSAGE_TYPE") == "BUTTON":
                 await context.bot.send_message(
                     chat_id=update.effective_chat.id,
-                    text="Actions:",
+                    text="🎥 Discovered a video note\! Click below to see the transcription",
                     reply_to_message_id=update.message.message_id,
                     parse_mode="MarkdownV2",
                     reply_markup=InlineKeyboardMarkup(
@@ -272,14 +274,15 @@ async def process_video_note_message(update: Update, context: ContextTypes.DEFAU
                     )
                 )
             else:
-                reply_text = f"*{update.message.from_user.username}*: {escape(transcription)}"
+                reply_text = f"*{escape(update.message.from_user.username)}*: {escape(transcription)}"
                 await context.bot.send_message(
                     chat_id=update.effective_chat.id,
                     text=reply_text,
                     reply_to_message_id=update.message.message_id,
                     parse_mode="MarkdownV2"
                 )
-    except:
+    except Exception as e:
+        logging.error(f"Error in process_video_note_message: {str(e)}")
         pass
     finally:
         if path_to_video_file != None:
