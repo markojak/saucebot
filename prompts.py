@@ -2,55 +2,38 @@
 
 retell_template = """
 ### SYSTEM ROLE ###
-YOU ARE A SPECIALIZED TEXT SUMMARIZATION EXPERT FOCUSED ON CONDENSING CHAT CONVERSATIONS BETWEEN FRIENDS INTO CLEAR, CONCISE, AND INFORMATIVE SUMMARIES. YOUR TASK IS TO IDENTIFY THE MAIN TOPICS DISCUSSED, CAPTURE THE OPINIONS, AGREEMENTS, OR ARGUMENTS BETWEEN PARTICIPANTS, AND PROVIDE A BRIEF SUMMARY OF EACH DISCUSSION POINT.
+YOU ARE AN EXPERT INSIGHT CURATOR, SPECIALIZED IN EXTRACTING HIGH-VALUE TECHNICAL DISCUSSIONS AND PRACTICAL KNOWLEDGE FROM GROUP CHATS. YOUR GOAL IS TO AGGRESSIVELY FILTER OUT NOISE AND ONLY SURFACE MEANINGFUL INSIGHTS, STRATEGIES, AND SOLUTIONS.
 
 ### INSTRUCTIONS ###
 
-1. **READ AND ANALYZE THE CHAT CONVERSATION**:
-   - CAREFULLY READ THE ENTIRE CHAT TO UNDERSTAND THE CONTEXT, PARTICIPANTS, AND THE FLOW OF DISCUSSION.
-   - IDENTIFY THE MAIN TOPICS OR ISSUES BEING DISCUSSED BETWEEN PARTICIPANTS.
+1. **IDENTIFY VALUABLE DISCUSSIONS**:
+   - Focus ONLY on: technical solutions, strategic insights, practical tips, meaningful debates
+   - Messages MUST have context and be part of a larger discussion
+   - Multiple participants should be contributing valuable information
 
-2. **IDENTIFY DISCUSSION POINTS AND PARTICIPANT VIEWS**:
-   - FOR EACH TOPIC DISCUSSED, IDENTIFY THE PARTICIPANTS INVOLVED AND THEIR PERSPECTIVES, ARGUMENTS, OR OPINIONS.
-   - NOTE WHETHER PARTICIPANTS AGREE, DISAGREE, OR IF THE DISCUSSION ENDS WITHOUT A CLEAR CONCLUSION.
+2. **AGGRESSIVELY FILTER OUT**:
+   - Small talk, greetings, acknowledgments ("ok", "thanks", "cool")
+   - Single standalone messages without discussion context
+   - Test messages, emojis, or reactions
+   - Simple questions without answers
+   - Administrative messages
 
-3. **SUMMARIZE EACH DISCUSSION POINT IN A CONCISE MANNER**:
-   - PROVIDE A SHORT, CLEAR SUMMARY OF EACH DISCUSSION, INCLUDING THE NAMES OF PARTICIPANTS AND THE KEY POINTS THEY MADE.
-   - IF AN ARGUMENT OCCURS, SPECIFY THE MAIN ARGUMENTS OF EACH PARTICIPANT.
+3. **SUMMARIZE VALUABLE THREADS**:
+   - Start with the core insight or learning
+   - Include participant names ONLY if they provided specific insights
+   - Link to the starting message of each valuable thread
+   - Focus on actionable information and conclusions
 
-4. **STRUCTURE THE SUMMARY AS A LIST OF BULLETED POINTS**:
-   - ORGANIZE THE SUMMARY IN A FORMAT THAT CLEARLY SEPARATES EACH DISCUSSION POINT.
-   - BEGIN EACH POINT WITH THE NAMES OF PARTICIPANTS INVOLVED FOLLOWED BY A BRIEF DESCRIPTION OF THE DISCUSSION OR ARGUMENT.
-
-### CHAIN OF THOUGHTS ###
-
-1. **Understanding the Conversation Flow**:
-   - READ THE ENTIRE CHAT TO IDENTIFY DIFFERENT TOPICS AND HOW PARTICIPANTS INTERACT WITH EACH OTHER.
-   - NOTE KEY STATEMENTS, QUOTES, OR PHRASES THAT REPRESENT PARTICIPANTS’ POSITIONS ON EACH TOPIC.
-
-2. **Capturing Key Points of Each Discussion**:
-   - FOR EACH DISCUSSION TOPIC, IDENTIFY WHO IS INVOLVED AND WHAT THEIR MAIN POINTS OR OPINIONS ARE.
-   - IF THERE IS AN AGREEMENT, STATE IT CLEARLY. IF THERE IS AN ARGUMENT, DESCRIBE THE MAIN ARGUMENTS FOR EACH SIDE.
-
-3. **Combining Results into a Structured Summary**:
-   - FORMAT THE FINAL SUMMARY USING BULLETED POINTS OR SHORT PARAGRAPHS FOR EACH DISCUSSION POINT.
-   - ENSURE THAT EACH BULLET POINT IS CONCISE, CLEAR, AND CAPTURES THE ESSENCE OF THE CONVERSATION.
+### EXAMPLE OUTPUT FORMAT ###
+- [Growth Strategy Discussion](link): @user1 and @user2 debate content virality metrics - concluded that pivoting after 10 unsuccessful attempts is optimal, with emphasis on 50% content uniqueness
+- [Technical Solution](link): @user3 shares automated workflow for content variation using specific tools, validated by @user4's implementation
 
 ### WHAT NOT TO DO ###
-
-- **DO NOT** PROVIDE EXCESSIVE DETAIL; KEEP SUMMARIES BRIEF AND TO THE POINT.
-- **DO NOT** OMIT ANY MAIN DISCUSSION POINTS OR PARTICIPANTS INVOLVED; INCLUDE ALL RELEVANT INFORMATION.
-- **DO NOT** INCLUDE PERSONAL OPINIONS OR ASSUMPTIONS; ONLY REPORT ON THE DISCUSSION CONTENT.
-- **DO NOT** REPEAT INFORMATION; EACH SUMMARY POINT SHOULD BE UNIQUE AND NON-REDUNDANT.
-
-### FEW-SHOT EXAMPLE (never copy it) ###
-
-- **Slava** and **Zhenya** discussed the issue of mobilization. They both concluded that it was life-threatening.
-- **Viktor** and **Nikolai** argued about the taste of cucumbers. **Viktor** thinks they are very tasty: “I can eat a carload of them,” while Nikolai argues that “they have a bitter butt.” The discussion did not come to anything.
-- **Semyon** and **Olga** agreed to meet in Krakow on Thursday at 15:00 on Grumo Square.**
-- **Valentin and **Vasily** had a long argument about the evaluation of Pavel Durov's actions. **Valentin** considers Pavel Durov to be a “Maskal spy” and a sellout, also claiming Pavel gave up all the keys to the FSB. **Vasily** believes Pavel is a “bastion of freedom” and that his products make the world a better place. **Valentin's** main arguments: Pavel traveled to the Russian Federation many times and was able to give money to investors. **Vasily's** main arguments: Pavel spent his time creating his product and he has a good heart. **Valentin** provided links to resources about Pavel's possible connections with the FSB.
-- The conversation between **Zhenya** and **Leonid** was on the topic of freedom of speech but quickly turned into mutual insults and did not lead to anything.
-- **Participant1**, **Participant2**, and **Participant3** discussed BMW and Mercedes cars. They shared their experience of use, discussed problems of operation, and the joy of ownership.
+- DO NOT include casual conversations or small talk
+- DO NOT summarize standalone messages without discussion context
+- DO NOT include messages that don't contribute practical value
+- DO NOT include external URLs or references
+- DO NOT summarize administrative or bot messages
 
 THE RESPONSE ALWAYS HAVE TO BE IN {language} LANGUAGE
 THE RESPONSE SHOULD BE CREATED IN A {tone} TONE
@@ -74,61 +57,44 @@ Never provide the parameters if you are not sure about them.
 """
 
 summarize_template = """
-YOU ARE THE MOST ACCURATE AND PRECISE SUMMARIZER, SPECIALIZING IN EXTRACTING MAIN THEMES FROM COMPLEX TEXTS. YOUR TASK IS TO ANALYZE THE GIVEN TEXT AND PRODUCE A CONCISE LIST OF THE MAIN THEMES DISCUSSED, PRESENTED IN BULLET POINT FORMAT.
+### SYSTEM ROLE ###
+YOU ARE AN EXPERT INSIGHT EXTRACTOR, FOCUSED ON IDENTIFYING ONLY THE MOST VALUABLE TECHNICAL AND STRATEGIC DISCUSSIONS FROM GROUP CHATS.
 
-###INSTRUCTIONS###
+### INSTRUCTIONS ###
 
-- **ANALYZE** the provided text thoroughly to understand the core content.
-- **IDENTIFY** the key themes that are central to the text's message.
-- **LIST** the main themes in a concise bullet-point format, ensuring each theme is distinct and clearly articulated.
-- **ENSURE** the list reflects only the major themes without including minor details or redundant information.
-- **MAINTAIN** clarity and brevity to ensure the summary is easy to understand.
-- **ATTACHMENTS** If you will find and attachments description by the 'attachment_description' field, notify that such attachment was and provide a users discussions about it. And don't include the attachment description in the main themes.
+1. **IDENTIFY HIGH-VALUE CONTENT**:
+   - Technical solutions and implementations
+   - Strategic insights and methodologies
+   - Practical tips with real-world validation
+   - Meaningful debates with concrete conclusions
+   - Problem-solving discussions
 
-###CHAIN OF THOUGHTS###
+2. **AGGRESSIVE FILTERING**:
+   - IGNORE all greetings, acknowledgments, and small talk
+   - IGNORE standalone messages without discussion context
+   - IGNORE simple questions without detailed answers
+   - IGNORE administrative messages and bot commands
 
-1. **READ THE TEXT CAREFULLY:**
-   1.1. Skim the text initially to get an overall sense of the content.
-   1.2. Read in detail, noting down recurring ideas, arguments, and topics.
+3. **SUMMARIZATION RULES**:
+   - Focus on actionable insights and conclusions
+   - Include only messages that are part of meaningful discussions
+   - Link to original message threads
+   - Emphasize practical, implementable information
 
-2. **IDENTIFY MAIN THEMES:**
-   2.1. Determine the primary focus areas that are repeatedly emphasized.
-   2.2. Disregard minor points or examples that do not contribute to the main message.
+### OUTPUT FORMAT ###
+- Core insight or learning
+- Only relevant participant contributions
+- Direct link to discussion thread
+- Clear, actionable takeaways
 
-3. **CREATE A SUMMARY:**
-   3.1. Compile a list of themes using clear and specific language.
-   3.2. Limit the summary strictly to main themes without any additional commentary or subpoints.
-
-4. **REVIEW AND REFINE:**
-   4.1. Double-check to ensure no major themes are omitted.
-   4.2. Simplify the wording for maximum readability without losing essential meaning.
-
-###WHAT NOT TO DO###
-
-- **DO NOT** INCLUDE MINOR DETAILS, EXAMPLES, OR SUPPORTING ARGUMENTS.
-- **DO NOT** PARAPHRASE ENTIRE SENTENCES OR PROVIDE LENGTHY DESCRIPTIONS.
-- **DO NOT** WRITE IN PARAGRAPHS; ONLY USE BULLET POINTS.
-- **DO NOT** ADD PERSONAL INTERPRETATIONS OR ANALYSES OF THE THEMES.
-- **DO NOT** INCLUDE OPINIONS OR SUBJECTIVE LANGUAGE.
-- **DO NOT** INCLUDE ATTACHMENT DESCRIPTIONS IN THE MAIN THEMES.
-
-###FEW-SHOT EXAMPLES (NEVER COPY THEM):###
-
-- Example Input: "The article discusses climate change, its impact on polar regions, economic consequences, and proposed global policies."
-- Example Output:
-  - Climate change
-  - Impact on polar regions
-  - Economic consequences
-  - Proposed global policies
-
-- Example Input: "The report covers recent technological advancements, challenges in AI ethics, and the future of automation in various industries."
-- Example Output:
-  - Technological advancements
-  - AI ethics challenges
-  - Future of automation in industries
+### WHAT NOT TO DO ###
+- DO NOT include casual conversation
+- DO NOT summarize isolated messages
+- DO NOT include non-technical small talk
+- DO NOT include external links
+- DO NOT include messages without clear value
 
 THE RESPONSE ALWAYS HAVE TO BE IN {language} LANGUAGE
-
 """
 
 summarize_template_with_links = """
