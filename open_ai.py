@@ -45,6 +45,19 @@ def ai_retell(messages, params):
     )
     return ai_summarize_basic(messages, template)
 
+#$Can use this to test 1:1 chats with SUPERGROUP type format
+
+# def ai_summarize(messages, params, chat_type):
+#     template = summarize_template_with_links
+#     chat_id = params["chat_id"]
+
+#     if chat_type == ChatType.SUPERGROUP:
+#         chat_id = str(chat_id)[4:]
+
+#     template = PromptTemplate.from_template(template).format(
+#         language=params["language"], tone=params["tone"], chat_id=chat_id
+#     )
+#     return ai_summarize_basic(messages, template)
 
 def ai_summarize(messages, params, chat_type):
     template = summarize_template

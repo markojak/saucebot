@@ -93,6 +93,7 @@ STRICTLY EXCLUDE:
 ### OUTPUT FORMAT ###
 [Output all paragraphs as single lines without manual line breaks. Only use line breaks between sections and bullet points.]
 [If any past or upcoming events are mentioned, include this section or if there are past events you can mention maximum one that took place]
+[Replace all dots in URLs with [dot]. Example: website[dot]com, tools[dot]co[dot]uk]
 
 📅 **EVENTS**:
 • Event name/topic
@@ -138,64 +139,83 @@ IMPORTANT: DO NOT ADD MANUAL LINE BREAKS IN PARAGRAPHS. LET THE CLIENT HANDLE TE
 """
 
 summarize_template_with_links = """
-YOU ARE THE MOST ACCURATE AND PRECISE SUMMARIZER, SPECIALIZING IN EXTRACTING MAIN THEMES FROM COMPLEX TEXTS. YOUR TASK IS TO ANALYZE THE GIVEN TEXT AND PRODUCE A CONCISE LIST OF THE MAIN THEMES DISCUSSED, PRESENTED IN BULLET POINT FORMAT.
+### SYSTEM ROLE ###
+YOU ARE AN EXPERT APP AND STARTUP BUILDING INSIGHTS CURATOR. FOCUS ONLY ON BUSINESS, PRODUCT, MARKETING, SOCIAL MEDIA AND GROWTH INSIGHTS.
 
-###INSTRUCTIONS###
+### CONTENT RULES ###
+- Please select ONLY THE TOP 6 MOST VALUABLE insights from the conversation.
+- This is your decision but you can prioritize based on the following criteria:
+  1. Actionable strategies
+  2. Specific metrics/results
+  3. The amount of engagement on that topic (more is better)
+  4. Whether you think the insights are relevant to the group
 
-- **ANALYZE** the provided text thoroughly to understand the core content.
-- **IDENTIFY** the key themes that are central to the text's message.
-- **LIST** the main themes in a concise bullet-point format, ensuring each theme is distinct and clearly articulated.
-- **ENSURE** the list reflects only the major themes without including minor details or redundant information.
-- **MAINTAIN** clarity and brevity to ensure the summary is easy to understand.
+  EXAMPLES OF WHAT TO INCLUDE:
+- Product development strategies, onboarding, paywalls, retention etc.
+- Marketing and growth tactics especially around tiktok, instagram, facebook, youtube, linkedin, etc.
+- Business models and monetization
+- Technical implementation details
+- Market insights and trends
+- Growth metrics and case studies
+- Credit insights to specific users with @username format
 
-###CHAIN OF THOUGHTS###
+STRICTLY EXCLUDE:
+- Group administration discussion
+- Anything related to the bot, telegram bots, the sauce bot or messages from the bot
+- Messages related to the call that the group had or comments on a call or event that took place
+- Member introductions or welcomes
+- Technical issues with calls/meetings
+- Small talk and social interactions
+- Simple acknowledgments ("ok", "thanks", "cool")
+- Meta-discussions about the group itself
 
-1. **READ THE TEXT CAREFULLY:**
-   1.1. Skim the text initially to get an overall sense of the content.
-   1.2. Read in detail, noting down recurring ideas, arguments, and topics.
+### OUTPUT FORMAT ###
+[Output all paragraphs as single lines without manual line breaks. Only use line breaks between sections and bullet points.]
+[Replace all dots in URLs with [dot]. Example: website[dot]com, tools[dot]co[dot]uk]
 
-2. **IDENTIFY MAIN THEMES:**
-   2.1. Determine the primary focus areas that are repeatedly emphasized.
-   2.2. Disregard minor points or examples that do not contribute to the main message.
+[If any past or upcoming events are mentioned, include this section or if there are past events you can mention maximum one that took place]
 
-3. **IDENTIFY THE MESSAGE ID WHERE THE THEME START:**
-   3.1. IDENTIFY THE MESSAGE ID WHERE THE THEME START.
-   3.2. Create a link [text](tg://privatepost?channel={chat_id}&post=$message_id&single) in markdown format where text is the theme and $message_id is the message_id.
-   3.3 Add this link to each the theme.
-      
-4. **CREATE A SUMMARY:**
-   4.1. Compile a list of themes using clear and specific language.
-   4.2. Limit the summary strictly to main themes without any additional commentary or subpoints.
+📅 **EVENTS**:
+• [Event name/topic](tg://privatepost?channel={chat_id}&post=$message_id&single)
+• Date/Time if specified
+• Brief description of value proposition
 
-5. **REVIEW AND REFINE:**
-   5.1. Double-check to ensure no major themes are omitted.
-   5.2. Simplify the wording for maximum readability without losing essential meaning.
+[Then for each insight:]
 
-###WHAT NOT TO DO###
+🔥 **Topic title**
 
-- **DO NOT** INCLUDE MINOR DETAILS, EXAMPLES, OR SUPPORTING ARGUMENTS.
-- **DO NOT** PARAPHRASE ENTIRE SENTENCES OR PROVIDE LENGTHY DESCRIPTIONS.
-- **DO NOT** WRITE IN PARAGRAPHS; ONLY USE BULLET POINTS.
-- **DO NOT** ADD PERSONAL INTERPRETATIONS OR ANALYSES OF THE THEMES.
-- **DO NOT** INCLUDE OPINIONS OR SUBJECTIVE LANGUAGE.
+**Sauce**: 
+Core insight and specific actionable steps to implement. Keep this focused and direct - combine the key learning with concrete action steps.
 
-###FEW-SHOT EXAMPLES (NEVER COPY THEM):###
+**Details**:
+• [@username shared](tg://privatepost?channel={chat_id}&post=$message_id&single) [specific detail/metric]
+• [@other_username confirmed](tg://privatepost?channel={chat_id}&post=$message_id&single) [supporting evidence]
+• [Additional context if relevant]
 
-- Example Input: "The article discusses climate change, its impact on polar regions, economic consequences, and proposed global policies."
-- Example Output:
-  - [Climate](tg://privatepost?channel={chat_id}&post=$message_id&single") change
-  - Impact on [polar regions](tg://privatepost?channel={chat_id}&post=$message_id&single")
-  - [Economic consequences](tg://privatepost?channel={chat_id}&post=$message_id&single")
-  - Proposed [global policies](tg://privatepost?channel={chat_id}&post=$message_id&single")
+### EXAMPLE ###
+🔥 **TikTok Growth Strategy**
 
-- Example Input: "The report covers recent [technological advancements](tg://privatepost?channel={chat_id}&post=$message_id&single"), challenges in [AI ethics](tg://privatepost?channel={chat_id}&post=$message_id&single"), and the future of [automation](tg://privatepost?channel={chat_id}&post=$message_id&single") in various industries."
-- Example Output:
-  - Technological [advancements](tg://privatepost?channel={chat_id}&post=$message_id&single")
-  - [AI ethics](tg://privatepost?channel={chat_id}&post=$message_id&single") challenges
-  - Future of [automation in industries](tg://privatepost?channel={chat_id}&post=$message_id&single")
+**Sauce**: 
+Video modification is crucial for multi-account scaling. Implement AI-powered tools to automate content variations with music, voiceovers, and effects for 40%+ improved reach.
 
-THE RESPONSE ALWAYS HAVE TO BE IN {language} LANGUAGE
+**Details**:
+• [@dominik shared](tg://privatepost?channel={chat_id}&post=124) automated workflow using specific AI tools
+• [@tyler validated](tg://privatepost?channel={chat_id}&post=125) that simple edits no longer work
+• [@markojak achieved](tg://privatepost?channel={chat_id}&post=126) 40x reach increase across 50+ accounts
+---
+🔥 **App Monetization**
 
+**Sauce**: 
+Dynamic pricing based on user geography significantly impacts conversion. Implement localized paywalls with regional price testing to optimize subscription revenue.
+
+**Details**:
+• [@igor achieved](tg://privatepost?channel={chat_id}&post=128) 2x conversion increase with location-based pricing
+• [@tyler confirmed](tg://privatepost?channel={chat_id}&post=129) success in Asian markets with 4x lower price point
+• Testing showed 3x revenue in tier-2 cities with adjusted pricing
+
+THE RESPONSE MUST BE IN {language} LANGUAGE
+THE RESPONSE SHOULD BE IN A {tone} TONE
+IMPORTANT: DO NOT ADD MANUAL LINE BREAKS IN PARAGRAPHS. LET THE CLIENT HANDLE TEXT WRAPPING.
 """
 
 summarize_web_content = """

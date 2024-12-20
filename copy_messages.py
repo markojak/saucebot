@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# This script is used to copy messages from one chat to another for testing purposes so that you can test summarization of messages without affecting the group chat. 
+# enter the source chat id and target chat id and the script will copy the messages from the source chat to the target chat based on the same collection name
 # Initialize Firebase if not already initialized
 if not firebase_admin._apps:
     cred = credentials.Certificate("serviceAccountKey.json")
@@ -64,8 +66,8 @@ def copy_messages(source_chat_id: str, target_chat_id: str, limit: int = None):
 
 if __name__ == "__main__":
     # Remove -100 prefix if present in source chat ID
-    SOURCE_CHAT = "-1002217159309"     # Your source group chat ID (removed -100)
-    TARGET_CHAT = "535263823"      # Your test chat ID
+    SOURCE_CHAT = "-1002217159309"     # Your source group chat ID (removed -100) Software scalers ID
+    TARGET_CHAT = "535263823"      # Your test chat ID / markojak and saucebot staging ID
     LIMIT = 1000                   # Optional: limit number of messages to copy
     
     copy_messages(SOURCE_CHAT, TARGET_CHAT, LIMIT) 
