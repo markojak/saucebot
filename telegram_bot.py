@@ -98,13 +98,53 @@ async def default_summarize(
         messages = get_last_messages(str(update.message.chat.id), limit)
         result = ai_func(messages, params, update.message.chat.type)
         result = escape(result)
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id, text=result, parse_mode="MarkdownV2"
-        )
+        return result
     except Exception as error:
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id, text=repr(error)
+        print(f"Error in default_summarize: {str(error)}")
+        return None
+
+
+async def split_and_send_message(bot, chat_id, text, parse_mode=None):
+    """
+    Splits a long message into chunks and sends them sequentially
+    """
+    if text is None:
+        print("Warning: Received None text to send")
+        return await bot.send_message(
+            chat_id=chat_id,
+            text="Sorry, couldn't generate a summary."
         )
+    
+    MAX_MESSAGE_LENGTH = 4000  # Slightly less than 4096 to be safe
+    
+    if len(text) <= MAX_MESSAGE_LENGTH:
+        return await bot.send_message(
+            chat_id=chat_id,
+            text=text,
+            parse_mode=parse_mode
+        )
+    
+    # Split message into chunks
+    messages = []
+    for i in range(0, len(text), MAX_MESSAGE_LENGTH):
+        messages.append(text[i:i + MAX_MESSAGE_LENGTH])
+    
+    # Send each chunk
+    for i, message_text in enumerate(messages):
+        prefix = f"Part {i+1}/{len(messages)}\n\n" if len(messages) > 1 else ""
+        try:
+            await bot.send_message(
+                chat_id=chat_id,
+                text=prefix + message_text,
+                parse_mode=parse_mode
+            )
+        except Exception as e:
+            print(f"Error sending message part {i+1}: {str(e)}")
+            # Try sending without parse_mode if it fails
+            await bot.send_message(
+                chat_id=chat_id,
+                text=prefix + message_text
+            )
 
 
 async def summarize(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -113,14 +153,30 @@ async def summarize(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text="🤖 Processing... Please wait..."
     )
     try:
-        # Check if the first argument is "url"
         if len(context.args) > 0 and context.args[0].lower() == "url":
-            # Get limit from second argument if it exists
             limit = int(context.args[1]) if len(context.args) > 1 else int(os.getenv("DEFAULT_HISTORY_LENGTH"))
             await summarize_urls(update, context, limit)
         else:
-            # Original summarize behavior
-            await default_summarize(update, context, ai_summarize)
+            try:
+                result = await default_summarize(update, context, ai_summarize)
+                if result:
+                    await split_and_send_message(
+                        context.bot,
+                        update.effective_chat.id,
+                        result,
+                        parse_mode="MarkdownV2"
+                    )
+                else:
+                    await context.bot.send_message(
+                        chat_id=update.effective_chat.id,
+                        text="Sorry, couldn't generate a summary."
+                    )
+            except Exception as e:
+                print(f"Error in summarize: {str(e)}")
+                await context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text=f"Error generating summary: {str(e)}"
+                )
     finally:
         await processing_message.delete()
 

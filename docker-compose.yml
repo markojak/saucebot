@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  bot-dev:
+  suacebot:
     build:
       context: .
       dockerfile: Dockerfile.dev
@@ -12,13 +12,3 @@ services:
       - ./serviceAccountKey.json:/app/serviceAccountKey.json
       - .:/app
     command: watchmedo auto-restart --directory=. --pattern=*.py --recursive -- python main.py
-
-  bot:
-    build: .
-    volumes:
-      - ./.env.staging:/app/.env
-      - ./serviceAccountKey.json:/app/serviceAccountKey.json
-    # For development with auto-reload
-    command: python -m watchdog --patterns=*.py --recursive python main.py
-    # For production
-    # command: python main.py

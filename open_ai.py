@@ -23,8 +23,8 @@ from prompts import (
 
 load_dotenv()
 
-model_t9 = ChatOpenAI(model="gpt-4o-mini", temperature=0.9)
-model_t0 = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
+model_t9 = ChatOpenAI(model="chatgpt-4o-latest", temperature=0.9)
+model_t0 = ChatOpenAI(model="chatgpt-4o-latest", temperature=0.0)
 whisper_parser = OpenAIWhisperParser()
 
 parser = StrOutputParser()
